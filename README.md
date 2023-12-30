@@ -1,4 +1,5 @@
-Adds a download button to any nhentai gallery that allows to download all the gallery images as a cbz aka. zip archive
+Adds a download button to any nhentai gallery that allows to download all the
+gallery images as a cbz aka. zip archive
 
 <b>Short Demo Video:</b>
 
