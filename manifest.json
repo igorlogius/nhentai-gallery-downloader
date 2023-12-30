@@ -1,0 +1,19 @@
+{
+  "author": "igorlogius",
+  "homepage_url": "https://github.com/igorlogius/nhentai-gallery-downloader",
+  "manifest_version": 2,
+  "name": "nhentai Gallery Downloader",
+  "version": "1.0.0",
+  "description": "Adds a download button to any nhentai gallery that allows to download all the gallery images as a cbz aka. zip archive",
+  "icons": {
+    "128": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://nhentai.net/g/*"],
+      "js": ["filesaver.js", "jszip.js", "content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": ["https://*.nhentai.net/*"]
+}
