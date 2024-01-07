@@ -3,19 +3,19 @@ browser.browserAction.onClicked.addListener(async (tab) => {
   console.debug(tab);
   let tmp = await browser.tabs.executeScript({
     code: `
-  Array.from(
-    document.querySelectorAll(".thumb-container img") // site specific
-  ).map((el) => {
-    let url = el.getAttribute("data-src");
-    if (url) {
-      url = url.replace("https://t", "https://i"); // site specific
-      url = url.replace("t.jpg", ".jpg"); // site specific
-      url = url.replace("t.jpeg", ".jpeg"); // site specific
-      url = url.replace("t.png", ".png"); // site specific
-      url = url.replace("t.gif", ".gif"); // site specific
-    }
-    return url;
-  });
+          Array.from(
+            document.querySelectorAll(".thumb-container img")
+          ).map((el) => {
+            let url = el.getAttribute("data-src");
+            if (url) {
+              url = url.replace("https://t", "https://i");
+              url = url.replace("t.jpg", ".jpg");
+              url = url.replace("t.jpeg", ".jpeg");
+              url = url.replace("t.png", ".png");
+              url = url.replace("t.gif", ".gif");
+            }
+            return url;
+          });
         `,
   });
   //console.debug(tmp[0]);
