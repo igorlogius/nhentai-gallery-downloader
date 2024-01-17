@@ -1,8 +1,14 @@
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 browser.browserAction.onClicked.addListener(async (tab) => {
-  browser.browserAction.disable(tab.od);
-  console.debug(tab);
-  let tmp = await browser.tabs.executeScript({
-    code: `
+  const tabId = tab.id;
+  const tabTitle = tab.title;
+  let tmp;
+  let tabdead = false;
+
+  try {
+    tmp = await browser.tabs.executeScript({
+      code: `
           Array.from(
             document.querySelectorAll(".thumb-container img")
           ).map((el) => {
@@ -17,12 +23,36 @@ browser.browserAction.onClicked.addListener(async (tab) => {
             return url;
           });
         `,
-  });
-  //console.debug(tmp[0]);
+    });
+  } catch (e) {
+    // stop if we fail to inject/extract the data
+    return;
+  }
+
+  if (
+    !Array.isArray(tmp) ||
+    tmp.length !== 1 ||
+    !Array.isArray(tmp[0]) ||
+    tmp[0].length < 1
+  ) {
+    await browser.browserAction.setBadgeText({
+      text: "❌",
+      tabId,
+    });
+    return;
+  }
 
   const urls = tmp[0];
 
+  try {
+    await browser.browserAction.disable(tabId);
+  } catch (e) {
+    tabdead = true;
+  }
+
   const zip = new JSZip();
+
+  let counter = 1;
 
   for (const url of urls) {
     const filename = url.split("/").pop();
@@ -30,19 +60,53 @@ browser.browserAction.onClicked.addListener(async (tab) => {
     zip.file(filename, fetch_ret.arrayBuffer(), {
       binary: "uint8Array",
     });
+
+    if (!tabdead) {
+      counter++;
+      try {
+        await browser.browserAction.setBadgeText({
+          text: "" + Math.floor((counter / urls.length / 2) * 100),
+          tabId,
+        });
+      } catch (e) {
+        // noop
+        tabdead = true;
+      }
+    }
+    sleep(5000);
   }
-  let blob = await zip.generateAsync({ type: "blob" }, (meta) => {
-    browser.browserAction.setBadgeText({
-      text: "" + Math.floor(meta.percent),
-      tabId: tab.id,
-    });
+
+  let blob = await zip.generateAsync({ type: "blob" }, async (meta) => {
+    if (!tabdead) {
+      try {
+        await browser.browserAction.setBadgeText({
+          text: "" + Math.floor(50 + meta.percent / 2),
+          tabId: tab.id,
+        });
+      } catch (e) {
+        // noop
+        tabdead = true;
+      }
+    }
   });
-  browser.browserAction.setBadgeText({
-    text: "",
-    tabId: tab.id,
-  });
-  saveAs(blob, tab.title + ".cbz");
-  browser.browserAction.enable(tab.id);
+  if (!tabdead) {
+    try {
+      await browser.browserAction.setBadgeText({
+        text: "✅",
+        tabId,
+      });
+    } catch (e) {
+      tabdead = true;
+    }
+  }
+  saveAs(blob, tabTitle + ".cbz");
+  if (!tabdead) {
+    try {
+      await browser.browserAction.enable(tabId);
+    } catch (e) {
+      tabdead = true;
+    }
+  }
 });
 
 const filter = {
@@ -64,3 +128,5 @@ function handleUpdated(tabId, changeInfo, tabInfo) {
 browser.tabs.onUpdated.addListener(handleUpdated, filter);
 
 browser.browserAction.disable();
+
+browser.browserAction.setBadgeBackgroundColor({ color: "white" });
