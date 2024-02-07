@@ -73,7 +73,7 @@ browser.browserAction.onClicked.addListener(async (tab) => {
         tabdead = true;
       }
     }
-    sleep(5000);
+    await sleep(1000);
   }
 
   let blob = await zip.generateAsync({ type: "blob" }, async (meta) => {
