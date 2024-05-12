@@ -151,33 +151,32 @@ function handleUpdated(tabId, changeInfo, tabInfo) {
   }
 }
 
-async function onStorageChange() {
+(async () => {
   downloadedIds = await getFromStorage("object", "downloadedIds", new Set());
-}
+  browser.tabs.onUpdated.addListener(handleUpdated, filter);
 
-browser.tabs.onUpdated.addListener(handleUpdated, filter);
+  browser.browserAction.disable();
 
-browser.browserAction.disable();
+  browser.browserAction.setBadgeBackgroundColor({ color: "white" });
 
-browser.browserAction.setBadgeBackgroundColor({ color: "white" });
+  browser.menus.create({
+    title: "Clear Downloaded History Markers",
+    contexts: ["browser_action"],
+    onclick: async (tab, info) => {
+      downloadedIds.clear();
+      setToStorage("downloadedIds", downloadedIds);
 
-browser.menus.create({
-  title: "Clear Downloaded History Markers",
-  contexts: ["browser_action"],
-  onclick: async (tab, info) => {
-    downloadedIds.clear();
-    setToStorage("downloadedIds", downloadedIds);
-
-    Array.from(await browser.tabs.query({})).forEach((t) => {
-      if (
-        typeof t.url === "string" &&
-        t.url.startsWith("https://nhentai.net/g/")
-      ) {
-        browser.browserAction.setBadgeText({
-          text: "",
-          tabId: t.id,
-        });
-      }
-    });
-  },
-});
+      Array.from(await browser.tabs.query({})).forEach((t) => {
+        if (
+          typeof t.url === "string" &&
+          t.url.startsWith("https://nhentai.net/g/")
+        ) {
+          browser.browserAction.setBadgeText({
+            text: "",
+            tabId: t.id,
+          });
+        }
+      });
+    },
+  });
+})();
