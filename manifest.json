@@ -15,5 +15,5 @@
   "icons": {
     "128": "icon.png"
   },
-  "permissions": ["activeTab", "https://*.nhentai.net/*"]
+  "permissions": ["menus", "storage", "activeTab", "https://*.nhentai.net/*"]
 }

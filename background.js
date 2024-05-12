@@ -1,5 +1,18 @@
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+let downloadedIds = new Set();
+
+async function setToStorage(id, value) {
+  let obj = {};
+  obj[id] = value;
+  return browser.storage.local.set(obj);
+}
+
+async function getFromStorage(type, id, fallback) {
+  let tmp = await browser.storage.local.get(id);
+  return typeof tmp[id] === type ? tmp[id] : fallback;
+}
+
 browser.browserAction.onClicked.addListener(async (tab) => {
   const tabId = tab.id;
   const tabTitle = tab.title;
@@ -95,6 +108,12 @@ browser.browserAction.onClicked.addListener(async (tab) => {
         text: "✅",
         tabId,
       });
+
+      const tmp = tab.url.split("https://nhentai.net/g/")[1].split("/")[0];
+      if (!downloadedIds.has(tmp)) {
+        downloadedIds.add(tmp);
+        setToStorage("downloadedIds", downloadedIds);
+      }
     } catch (e) {
       tabdead = true;
     }
@@ -119,10 +138,21 @@ function handleUpdated(tabId, changeInfo, tabInfo) {
     changeInfo.url.startsWith("https://nhentai.net/g/")
   ) {
     browser.browserAction.enable(tabId);
+    const tmp = changeInfo.url.split("https://nhentai.net/g/")[1].split("/")[0];
+    if (downloadedIds.has(tmp)) {
+      browser.browserAction.setBadgeText({
+        text: "✅",
+        tabId,
+      });
+    }
   } else {
     browser.browserAction.setBadgeText({ text: "", tabId });
     browser.browserAction.disable(tabId);
   }
+}
+
+async function onStorageChange() {
+  downloadedIds = await getFromStorage("object", "downloadedIds", new Set());
 }
 
 browser.tabs.onUpdated.addListener(handleUpdated, filter);
@@ -130,3 +160,24 @@ browser.tabs.onUpdated.addListener(handleUpdated, filter);
 browser.browserAction.disable();
 
 browser.browserAction.setBadgeBackgroundColor({ color: "white" });
+
+browser.menus.create({
+  title: "Clear Downloaded History Markers",
+  contexts: ["browser_action"],
+  onclick: async (tab, info) => {
+    downloadedIds.clear();
+    setToStorage("downloadedIds", downloadedIds);
+
+    Array.from(await browser.tabs.query({})).forEach((t) => {
+      if (
+        typeof t.url === "string" &&
+        t.url.startsWith("https://nhentai.net/g/")
+      ) {
+        browser.browserAction.setBadgeText({
+          text: "",
+          tabId: t.id,
+        });
+      }
+    });
+  },
+});
