@@ -32,6 +32,7 @@ browser.browserAction.onClicked.addListener(async (tab) => {
               url = url.replace("t.jpeg", ".jpeg");
               url = url.replace("t.png", ".png");
               url = url.replace("t.gif", ".gif");
+              url = url.replace("t.webp", ".webp");
             }
             return url;
           });
