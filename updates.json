@@ -3,6 +3,10 @@
     "{1f24d990-5108-41ba-863a-1e44074a7a97}": {
       "updates": [
         {
+          "version": "1.0.6",
+          "update_link": "https://github.com/igorlogius/nhentai-gallery-downloader/releases/download/1.0.6/nhentai-gallery-downloader-1.0.6.xpi"
+        },
+        {
           "version": "1.0.5",
           "update_link": "https://github.com/igorlogius/nhentai-gallery-downloader/releases/download/1.0.5/nhentai-gallery-downloader-1.0.5.xpi"
         },

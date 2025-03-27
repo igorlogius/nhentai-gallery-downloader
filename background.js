@@ -28,6 +28,7 @@ browser.browserAction.onClicked.addListener(async (tab) => {
             let url = el.getAttribute("data-src");
             if (url) {
               url = url.replace("https://t", "https://i");
+              url = url.replaceAll(".webp.webp", ".webp"); // fix: site issue duplicate .webp in data-src
               url = url.replace("t.jpg", ".jpg");
               url = url.replace("t.jpeg", ".jpeg");
               url = url.replace("t.png", ".png");

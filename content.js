@@ -20,7 +20,7 @@ async function downloadZip(ev) {
 
 function getUrls() {
   return Array.from(
-    document.querySelectorAll(".thumb-container img") // site specific
+    document.querySelectorAll(".thumb-container img"), // site specific
   ).map((el) => {
     let url = el.getAttribute("data-src");
     if (url) {
