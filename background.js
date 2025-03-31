@@ -28,12 +28,9 @@ browser.browserAction.onClicked.addListener(async (tab) => {
             let url = el.getAttribute("data-src");
             if (url) {
               url = url.replace("https://t", "https://i");
-              url = url.replaceAll(".webp.webp", ".webp"); // fix: site issue duplicate .webp in data-src
-              url = url.replace("t.jpg", ".jpg");
-              url = url.replace("t.jpeg", ".jpeg");
-              url = url.replace("t.png", ".png");
-              url = url.replace("t.gif", ".gif");
-              url = url.replace("t.webp", ".webp");
+              url = url.replace("t.", ".");
+              parts = url.split(".");
+              url = parts[0] + "." + parts[1] + "." + parts[2] + "." + parts[3];
             }
             return url;
           });
